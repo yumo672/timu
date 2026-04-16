@@ -66,7 +66,14 @@ def _record_to_dict(record):
     }
 
 
-def _request_to_dict(item):
+def _timeline_for_user(item, user):
+    records = item.approval_records.select_related("actor__profile")
+    if user.profile.role in {UserProfile.ROLE_APPLICANT, UserProfile.ROLE_MENTOR}:
+        return [_record_to_dict(record) for record in records]
+    return [_record_to_dict(record) for record in records if record.actor_id == user.id]
+
+
+def _request_to_dict(item, user):
     return {
         "id": item.id,
         "item_name": item.item_name,
@@ -83,7 +90,7 @@ def _request_to_dict(item):
         "applicant": item.applicant.profile.display_name,
         "applicant_username": item.applicant.username,
         "is_editable": item.can_edit(),
-        "timeline": [_record_to_dict(record) for record in item.approval_records.select_related("actor__profile")],
+        "timeline": _timeline_for_user(item, user),
     }
 
 
@@ -179,7 +186,7 @@ def purchases(request):
         return unauthorized
 
     if request.method == "GET":
-        items = [_request_to_dict(item) for item in _visible_requests_for(request.user)]
+        items = [_request_to_dict(item, request.user) for item in _visible_requests_for(request.user)]
         return JsonResponse({"results": items})
 
     if request.user.profile.role != UserProfile.ROLE_APPLICANT:
@@ -196,7 +203,7 @@ def purchases(request):
     except ValueError as exc:
         return JsonResponse({"detail": str(exc)}, status=400)
 
-    return JsonResponse(_request_to_dict(item), status=201)
+    return JsonResponse(_request_to_dict(item, request.user), status=201)
 
 
 def _get_owned_request(user, request_id):
@@ -228,7 +235,7 @@ def purchase_detail(request, request_id):
         return JsonResponse({"detail": "无权查看该申请。"}, status=403)
 
     if request.method == "GET":
-        return JsonResponse(_request_to_dict(item))
+        return JsonResponse(_request_to_dict(item, request.user))
 
     if role != UserProfile.ROLE_APPLICANT or item.applicant_id != request.user.id:
         return JsonResponse({"detail": "只有申请人可以编辑自己的申请。"}, status=403)
@@ -245,7 +252,7 @@ def purchase_detail(request, request_id):
         item.save()
     except ValueError as exc:
         return JsonResponse({"detail": str(exc)}, status=400)
-    return JsonResponse(_request_to_dict(item))
+    return JsonResponse(_request_to_dict(item, request.user))
 
 
 @require_http_methods(["POST"])
@@ -271,7 +278,7 @@ def submit_purchase(request, request_id):
         action=ApprovalRecord.ACTION_SUBMIT,
         comment="提交采购申请",
     )
-    return JsonResponse(_request_to_dict(item))
+    return JsonResponse(_request_to_dict(item, request.user))
 
 
 @require_http_methods(["POST"])
@@ -301,7 +308,7 @@ def approve_purchase(request, request_id):
         action=ApprovalRecord.ACTION_APPROVE,
         comment="审批通过",
     )
-    return JsonResponse(_request_to_dict(item))
+    return JsonResponse(_request_to_dict(item, request.user))
 
 
 @require_http_methods(["POST"])
@@ -336,4 +343,4 @@ def reject_purchase(request, request_id):
         action=ApprovalRecord.ACTION_REJECT,
         comment=item.rejection_reason,
     )
-    return JsonResponse(_request_to_dict(item))
+    return JsonResponse(_request_to_dict(item, request.user))

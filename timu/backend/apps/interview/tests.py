@@ -123,3 +123,48 @@ class ProcurementWorkflowTests(TestCase):
         response = self.client.get(f"/api/purchases/{request_item.id}/")
 
         self.assertEqual(response.status_code, 403)
+
+    def test_approver_timeline_only_contains_their_own_actions(self):
+        self.client.login(username="applicant", password="pass1234")
+        request_item = self._draft_request("6000.00")
+        self.client.post(f"/api/purchases/{request_item.id}/submit/")
+
+        self.client.logout()
+        self.client.login(username="finance", password="pass1234")
+        self.client.post(f"/api/purchases/{request_item.id}/approve/")
+        finance_detail_response = self.client.get(f"/api/purchases/{request_item.id}/")
+        self.assertEqual(finance_detail_response.status_code, 200)
+        finance_timeline = finance_detail_response.json()["timeline"]
+        self.assertEqual(len(finance_timeline), 1)
+        self.assertEqual(finance_timeline[0]["actor"], self.finance.profile.display_name)
+
+        self.client.logout()
+        self.client.login(username="mentor", password="pass1234")
+        self.client.post(f"/api/purchases/{request_item.id}/approve/")
+
+        self.client.logout()
+        self.client.login(username="finance", password="pass1234")
+        finance_after_mentor_response = self.client.get(f"/api/purchases/{request_item.id}/")
+        self.assertEqual(finance_after_mentor_response.status_code, 200)
+        finance_after_mentor_timeline = finance_after_mentor_response.json()["timeline"]
+        self.assertEqual(len(finance_after_mentor_timeline), 1)
+        self.assertEqual(finance_after_mentor_timeline[0]["actor"], self.finance.profile.display_name)
+
+    def test_mentor_can_view_complete_timeline(self):
+        self.client.login(username="applicant", password="pass1234")
+        request_item = self._draft_request("6000.00")
+        self.client.post(f"/api/purchases/{request_item.id}/submit/")
+
+        self.client.logout()
+        self.client.login(username="finance", password="pass1234")
+        self.client.post(f"/api/purchases/{request_item.id}/approve/")
+
+        self.client.logout()
+        self.client.login(username="mentor", password="pass1234")
+        mentor_detail_response = self.client.get(f"/api/purchases/{request_item.id}/")
+
+        self.assertEqual(mentor_detail_response.status_code, 200)
+        mentor_timeline = mentor_detail_response.json()["timeline"]
+        self.assertEqual(len(mentor_timeline), 2)
+        self.assertEqual(mentor_timeline[0]["actor"], self.applicant.profile.display_name)
+        self.assertEqual(mentor_timeline[1]["actor"], self.finance.profile.display_name)
