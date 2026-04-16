@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能采购审批系统</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body data-page="home">
+    <main class="page">
+        <section class="panel hero hero-grid">
+            <div>
+                <p class="eyebrow">Procurement Approval Workflow</p>
+                <h1>智能采购审批系统</h1>
+                <p class="lead">
+                    支持申请人提交采购申请，按金额自动分流到财务专员与导师审批，并实时查看打回原因与审批进度。
+                </p>
+                <div class="actions">
+                    <a class="button" href="/register/">注册 / 登录</a>
+                    <a class="button button-secondary" href="/dashboard/">进入工作台</a>
+                </div>
+            </div>
+            <div class="hero-card">
+                <div class="stat">
+                    <span class="stat-label">自动通过</span>
+                    <strong>小于 1000 元</strong>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">财务审批</span>
+                    <strong>1000 - 4999.99 元</strong>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">双重审批</span>
+                    <strong>5000 元及以上</strong>
+                </div>
+            </div>
+        </section>
+
+        <section class="panel split-panel">
+            <div>
+                <h2>核心角色</h2>
+                <ul class="list">
+                    <li>申请人：新增、编辑、提交采购申请，查看自己的审批进度与驳回原因。</li>
+                    <li>财务专员：审批中额与高额申请，可通过或打回并填写理由。</li>
+                    <li>导师：审批高额申请，并查看全量申请状态。</li>
+                </ul>
+            </div>
+            <div>
+                <h2>状态流转</h2>
+                <ul class="list">
+                    <li>待提交：申请可继续编辑。</li>
+                    <li>待审批 / 审批中：按角色顺序流转，不可越级处理。</li>
+                    <li>已通过：审批完成。</li>
+                    <li>已打回：申请人可查看原因并修改后重新提交。</li>
+                </ul>
+            </div>
+        </section>
+    </main>
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

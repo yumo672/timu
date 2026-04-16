@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>注册与登录</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body data-page="auth">
+    <main class="page">
+        <section class="panel auth-shell">
+            <div class="auth-intro">
+                <p class="eyebrow">Account Entry</p>
+                <h1>注册并进入审批流程</h1>
+                <p class="lead">首次使用可直接创建账号并选择角色；已有账号可立即登录进入工作台。</p>
+                <a class="button button-secondary" href="/">返回首页</a>
+            </div>
+            <div class="auth-grid">
+                <form class="card-form" id="register-form">
+                    <h2>注册</h2>
+                    <label>
+                        姓名
+                        <input name="display_name" placeholder="例如：张三">
+                    </label>
+                    <label>
+                        用户名
+                        <input name="username" placeholder="请输入登录用户名">
+                    </label>
+                    <label>
+                        密码
+                        <input name="password" type="password" placeholder="请输入密码">
+                    </label>
+                    <label>
+                        角色
+                        <select name="role">
+                            <option value="applicant">申请人</option>
+                            <option value="finance">财务专员</option>
+                            <option value="mentor">导师</option>
+                        </select>
+                    </label>
+                    <button class="button" type="submit">创建账号</button>
+                </form>
+
+                <form class="card-form" id="login-form">
+                    <h2>登录</h2>
+                    <label>
+                        用户名
+                        <input name="username" placeholder="请输入用户名">
+                    </label>
+                    <label>
+                        密码
+                        <input name="password" type="password" placeholder="请输入密码">
+                    </label>
+                    <button class="button" type="submit">登录工作台</button>
+                </form>
+            </div>
+            <div class="inline-message" id="auth-message"></div>
+        </section>
+    </main>
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
